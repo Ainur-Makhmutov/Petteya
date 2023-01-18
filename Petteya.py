@@ -1,5 +1,8 @@
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 from tkinter import *
 from tkinter.messagebox import showinfo, askyesno
+import random
 import copy
 
 location_x1=-1
@@ -129,16 +132,25 @@ def turn_player ():
         #для белых проверяем ход на соответствие правилам игры
         if ((location_x1,location_y1),(location_x2,location_y2)) in list_white:
             #делаем ход
-            do_move= turn_checkers(1,location_x1,location_y1,location_x2,location_y2)            
-        #для черных проверяем ход на соответствие правилам игры        
-        elif ((location_x1,location_y1),(location_x2,location_y2)) in list_black:
-            #делаем ход    
-            do_move= turn_checkers(1,location_x1,location_y1,location_x2,location_y2)                    
+            do_move= turn_checkers(1,location_x1,location_y1,location_x2,location_y2)  
+            board_canvas.update()
         else:
             #ход невыполнен
             chech_move=True
+        black_flag = True
+
+        while black_flag:
+            len_number = random.randint (0, len(list_black)-1)
+            location_x1,location_y1,location_x2,location_y2 = list_black [len_number][0][0], list_black [len_number][0][1], list_black [len_number][1][0], list_black [len_number][1][1]
+            if board_checker [location_y2] [location_x2]==0:
+               
+               # AI делает ход
+
+               do_move= turn_checkers_AI(1, location_x1,location_y1,location_x2,location_y2)
+               black_flag = False
+
     board_canvas.update()
-            
+
 #меняем положение шашки
 def turn_checkers(f,location_x1,location_y1,location_x2,location_y2):
     global board_checker
@@ -146,20 +158,56 @@ def turn_checkers(f,location_x1,location_y1,location_x2,location_y2):
         draw_board(location_x1,location_y1,location_x2,location_y2)  #рисуем игровое поле
 
     #делаем ход           
-    board_checker[location_y2][location_x2]=board_checker[location_y1][location_x1]
+    board_checker[location_y2][location_x2]=1
     board_checker[location_y1][location_x1]=0
 
     #забираем шашку
     for y in range(8):#сканируем всё поле
         for x in range(8):
-            if board_checker[y][x]==1 and board_checker[location_y2][location_x2] != 1:
-                if board_checker[y][x-1]==2 and board_checker[y][x+1]==2 or board_checker[y-1][x]==2 and board_checker[y+1][x]==2:
-                    board_checker[y][x]=0
-            if board_checker[y][x]==2 and board_checker[location_y2][location_x2] != 2:
-                if board_checker[y][x-1]==1 and board_checker[y][x+1]==1 or board_checker[y-1][x]==1 and board_checker[y+1][x]==1:
-                    board_checker[y][x]=0
+            
+            if board_checker[y][x]==2 and board_checker[location_y2][location_x2] !=2:
+                if y != 0 and y != 7:
+                    if x != 0 and x != 7:
+                        if (board_checker[y][x-1]==1 and board_checker[y][x+1]==1) or (board_checker[y-1][x]==1 and board_checker[y+1][x]==1):
+                            board_checker[y][x]=0
+                    else:
+                        if board_checker[y-1][x]==1 and board_checker[y+1][x]==1:
+                            board_checker[y][x]=0
+                else:
+                    if x != 0 and x != 7:
+                        if board_checker[y][x-1]==1 and board_checker[y][x+1]==1:
+                            board_checker[y][x]=0
                 
     if f:draw_board(location_x1,location_y1,location_x2,location_y2)#рисуем игровое поле
+
+def turn_checkers_AI(f,location_x1,location_y1,location_x2,location_y2):
+    global board_checker
+    if f:
+        draw_board(location_x1,location_y1,location_x2,location_y2)  #рисуем игровое поле
+
+    #делаем ход           
+    board_checker[location_y2][location_x2]=2
+    board_checker[location_y1][location_x1]=0
+
+    #забираем шашку
+    for y in range(8):#сканируем всё поле
+        for x in range(8):
+            
+            if board_checker[y][x]==1 and board_checker[location_y2][location_x2] !=1:
+                if y != 0 and y != 7:
+                    if x != 0 and x != 7:
+                        if (board_checker[y][x-1]==2 and board_checker[y][x+1]==2) or (board_checker[y-1][x]==2 and board_checker[y+1][x]==2):
+                            board_checker[y][x]=0
+                    else:
+                        if board_checker[y-1][x]==2 and board_checker[y+1][x]==2:
+                            board_checker[y][x]=0
+                else:
+                    if x != 0 and x != 7:
+                        if board_checker[y][x-1]==2 and board_checker[y][x+1]==2:
+                            board_checker[y][x]=0
+                
+    if f:draw_board(location_x1,location_y1,location_x2,location_y2)#рисуем игровое поле
+
 
 #проверка наличия ходов
 def check_moves_white(list_white):
