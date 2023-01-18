@@ -1,5 +1,3 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMessageBox
 from tkinter import *
 from tkinter.messagebox import showinfo, askyesno
 import random
